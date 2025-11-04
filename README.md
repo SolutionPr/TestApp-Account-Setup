@@ -1,97 +1,212 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# TestApp - Account Setup Mobile Application
 
-# Getting Started
+A React Native mobile application replicating the account setup experience with secure local authentication, form validation, and persistent state management.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## About
 
-## Step 1: Start Metro
+A React Native app with user registration, login, and profile screens. Everything runs locally - no backend needed. Features secure storage, form validation, and session management.
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## Getting Started
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+### Prerequisites
 
-```sh
-# Using npm
+- Node.js (v16 or higher)
+- npm or Yarn
+- React Native development environment set up
+- For iOS: Xcode, CocoaPods
+- For Android: Android Studio, JDK 17
+
+> **Note**: Make sure you have completed the [React Native Environment Setup](https://reactnative.dev/docs/set-up-your-environment) guide.
+
+### Installation
+
+1. **Clone the repository**
+```bash
+git clone <repository-url>
+cd TestApp
+```
+
+2. **Install dependencies**
+```bash
+npm install
+# or
+yarn install
+```
+
+3. **Install iOS dependencies (iOS only)**
+```bash
+cd ios
+bundle install
+bundle exec pod install
+cd ..
+```
+
+### Running the Application
+
+#### Start Metro Bundler
+```bash
 npm start
-
-# OR using Yarn
+# or
 yarn start
 ```
 
-## Step 2: Build and run your app
-
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
-
-```sh
-# Using npm
+#### Run on Android
+```bash
 npm run android
-
-# OR using Yarn
+# or
 yarn android
 ```
 
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
+#### Run on iOS
+```bash
 npm run ios
-
-# OR using Yarn
+# or
 yarn ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+### Testing
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+Run all tests:
+```bash
+npm test
+# or
+yarn test
+```
 
-## Step 3: Modify your app
+Run tests in watch mode:
+```bash
+npm test -- --watch
+```
 
-Now that you have successfully run the app, let's make changes!
+### Linting
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+Check code quality:
+```bash
+npm run lint
+# or
+yarn lint
+```
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+Fix linting issues:
+```bash
+npm run lint -- --fix
+```
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+## Architecture & Project Structure
 
-## Congratulations! :tada:
+### Design Patterns & State Management
 
-You've successfully run and modified your React Native App. :partying_face:
+- **Component Architecture**: Functional components with React Hooks
+- **State Management**: React Context API for auth state, local component state for forms
+- **Form Handling**: React Hook Form with Yup validation schemas
+- **Navigation**: React Navigation v6 with stack navigator
+- **Storage**: Encrypted storage using `react-native-encrypted-storage` for sensitive data
 
-### Now what?
+## Security Approach
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+### Credential Storage
 
-# Troubleshooting
+- **Library**: `react-native-encrypted-storage`
+- **Encryption**: Hardware-backed encryption
+  - iOS: Keychain Services with kSecAttrAccessibleAfterFirstUnlock
+  - Android: EncryptedSharedPreferences with AES-256-GCM encryption
+- **No plaintext storage**: All sensitive data encrypted at rest
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+### Password Security
 
-# Learn More
+- Passwords hashed before storage (simulated in local environment)
+- Password strength validation enforced
+- Confirm password matching required
+- No password visible by default (toggleable)
 
-To learn more about React Native, take a look at the following resources:
+### Session Management
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+- Session tokens generated on successful login
+- Tokens stored securely in encrypted storage
+- Auto-login on app restart if valid session exists
+- Complete session clearing on logout
+- Token expiration handling (future enhancement)
+
+### Additional Security Features
+
+- **Failed Login Lockout**: Optional 5-attempt limit (configurable)
+
+## State Persistence
+
+### Registration Draft Saving
+
+- Form state automatically saved to secure storage
+- Survives app restarts and crashes
+- Restored on return to registration screen
+- Cleared after successful registration
+
+### Session Persistence
+
+- User authentication state persists across app restarts
+- Automatic login if valid session exists
+- Secure token validation
+- Graceful fallback to login if session invalid
+
+### Data Storage Strategy
+
+```typescript
+SecureStorage {
+  'user_credentials': encrypted_credentials,
+  'session_token': encrypted_token,
+  'user_data': encrypted_user_profile,
+  'registration_draft': encrypted_form_state
+}
+```
+
+## Testing Coverage
+
+### Unit Tests
+
+- **Auth Service** (7 tests)
+  - User registration flow
+  - Duplicate email detection
+  - Login validation
+  - Password verification
+  - Case-insensitive email matching
+
+- **Validation Utils** (17 tests)
+  - Password strength scoring (5 levels)
+  - Email format validation
+  - Phone number validation
+  - Password confirmation matching
+  - All validation rules covered
+
+### Test Strategy
+
+- Jest + React Native Testing Library
+- Mock secure storage service
+- Isolated unit tests for business logic
+- Type-safe test implementations
+- 100% coverage for validation and auth logic
+
+### Running Tests
+
+```bash
+npm test                    # Run all tests
+npm test -- --coverage      # With coverage report
+npm test -- --watch        # Watch mode
+```
+## License
+
+This project is created for assessment purposes.
+
+## Development Notes
+
+- All form data is local-only
+- No actual network calls made
+- Country data sourced from local JSON file
+- CAPTCHA intentionally skipped as per requirements
+- Focus on security, validation, and user experience
+
+## Contributing
+
+This is an assessment project. For any questions or clarifications, please reach out to the development team.
+
+---
+
+**Built with using React Native & TypeScript**
